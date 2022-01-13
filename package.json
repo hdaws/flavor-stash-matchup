@@ -1,0 +1,25 @@
+{
+  "name": "flavor-stash-matchup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Flavor Stash Matchup",
+  "keywords": [
+    "gatsby"
+  ],
+  "scripts": {
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "formik": "^2.2.9",
+    "gatsby": "^4.5.2",
+    "gatsby-source-rest-api": "^0.2.3",
+    "lodash": "^4.17.21",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
