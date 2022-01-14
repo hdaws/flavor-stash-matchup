@@ -3,9 +3,6 @@ import { Formik , Field, FieldArray,  Form } from 'formik';
 import axios from 'axios';
 import {forEach, map, intersectionBy} from 'lodash';
 
-//TODO ATF does not 404 if a user doesn't exist, gets empty flavor list. Should handle this case and maybe display a warning?
-//TODO Formik onchange to submitted state isn't working. Find out why.
-
 const MixerList = () => {
     const MIN_MIXERS = 2;
     const MAX_MIXERS = 10;
@@ -34,7 +31,6 @@ const MixerList = () => {
                 }
             })
             setMixerData(data);
-            //TODO why can the state not be used here? it doesn't update in time
             calculateSetIntersection(data);
         })
     };
@@ -105,8 +101,7 @@ const MixerList = () => {
             <Formik
                 initialValues = {initialValues}
                 validate={validate}
-                onSubmit = {getMixersData}
-                handleChange = {()=>{setListSubmitted(false)}}>
+                onSubmit = {getMixersData}>
                 {({
                   values,
                   touched,
@@ -141,6 +136,11 @@ const MixerList = () => {
             <div>
                 {(!atfError && flavorSet.length > 0 && listSubmitted &&
                         <div>
+                            {Object.entries(mixerData).map(([key, value])=>(
+                                <div key={key}>
+                                    Name: {key}, Number of Flavors: {value.length}
+                                </div>
+                            ))}
                             <div> There are {flavorSet.length} flavors in common between all mixers </div>
                             { flavorSet.map((flavor, index) => (
                                 <div key={index}>
