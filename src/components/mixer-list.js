@@ -3,10 +3,14 @@ import { Formik , Field, FieldArray,  Form } from 'formik';
 import axios from 'axios';
 import {forEach, map, intersectionBy} from 'lodash';
 
+//TODO showing mixer names and such is broken. use state?
+//TODO implement reset button to wipe all names from form.
+
 const MixerList = () => {
     const MIN_MIXERS = 2;
     const MAX_MIXERS = 10;
     const initialValues = { mixers: ['', '']} ;
+    let mixerNames = [];
     const [mixerData, setMixerData] = useState({});
     const [flavorSet, setFlavorSet] = useState([]);
     const [listSubmitted, setListSubmitted] = useState(false);
@@ -17,6 +21,8 @@ const MixerList = () => {
         setAtfError(false);
        let mixerPromises = [];
        let data = {...mixerData};
+
+       mixerNames = values.mixers;
 
         forEach(values.mixers, (mixer)=>{
             mixerPromises.push(getUserData(mixer));
@@ -36,12 +42,10 @@ const MixerList = () => {
     };
 
     const calculateSetIntersection = (data) => {
-       let mixerNames =  Object.keys(data);
        let flavorSet = data[mixerNames[0]];
-       mixerNames.splice(0,1);
-       forEach(mixerNames, (mixer) => {
-           flavorSet = intersectionBy(flavorSet, data[mixer], 'id')
-        })
+        for (let i = 1; i < mixerNames.length; i++) {
+            flavorSet = intersectionBy(flavorSet, data[mixerNames[i]], 'id')
+        }
         setFlavorSet(flavorSet);
         setListSubmitted(true);
     }
@@ -130,15 +134,16 @@ const MixerList = () => {
                          )}
                      </FieldArray>
                     <button disabled={isSubmitting} type="submit">Submit</button>
+                     <button disabled={isSubmitting} type="button">Reset</button>
                  </Form>
                 )}
             </Formik>
             <div>
                 {(!atfError && flavorSet.length > 0 && listSubmitted &&
                         <div>
-                            {Object.entries(mixerData).map(([key, value])=>(
-                                <div key={key}>
-                                    Name: {key}, Number of Flavors: {value.length}
+                            {mixerNames.map((name)=>(
+                                <div key={name}>
+                                    Name: {name}, Number of Flavors: {mixerData[name].length}
                                 </div>
                             ))}
                             <div> There are {flavorSet.length} flavors in common between all mixers </div>
