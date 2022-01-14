@@ -77,8 +77,8 @@ const MixerList = () => {
             .map(({ flavors }) => flavors)
             .reduce((a, b) => intersectionBy(a, b, 'id'))
         );
-        setCompleted(true);
       }
+      setCompleted(true);
     },
     [setError, setCompleted, setMixerFlavors, setMixerNames, setDistinctFlavors]
   );
