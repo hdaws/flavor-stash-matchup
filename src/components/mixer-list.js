@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Formik , Field, FieldArray,  Form } from 'formik';
 import axios from 'axios';
 import {forEach, map, intersectionBy} from 'lodash';
@@ -6,12 +6,10 @@ import {forEach, map, intersectionBy} from 'lodash';
 const MixerList = () => {
     const MIN_MIXERS = 2;
     const MAX_MIXERS = 5;
-    const initialValues = { mixers: ["", ""]} ;
+    const initialValues = { mixers: ['', '']} ;
     const [mixerData, setMixerData] = useState({});
     const [flavorSet, setFlavorSet] = useState([]);
 
-    //TODO you better damn well validate before you get here stardust.
-    //TODO also figure out how to properly use is submitting because it always disables the button.
     const getMixersData = (values) => {
        let mixerPromises = [];
        let data = {...mixerData};
@@ -44,18 +42,21 @@ const MixerList = () => {
         setFlavorSet(flavorSet);
     }
 
-    //TODO fix this it isn't working across submits.
-    //Cache some data per mixer so we don't slam ATF
-    const getUserData = useCallback((mixer)=>{
+    //Check the state to see if we already got and processed the user data.
+    const getUserData = (mixer)=>{
+        if(mixerData[mixer]){
+            return Promise.resolve({mixer, mixerFlavorData: mixerData[mixer]})
+        }
         return getAllMixerData(mixer)
-    }, [])
+    }
 
+    //TODO fix linter error and understand why the moreData and currpage cause issues.
     async function getAllMixerData(mixer){
         let currPage = 1;
         let moreData = true;
         let mixerFlavorData = [];
         while(moreData){
-            await axios.get(`https://alltheflavors.com/api/v2/users/${mixer}/flavors?page[number]=${currPage}&page[size]=100`).then((atfResponse) => {
+            await axios.get(`https://alltheflavors.com/api/v2/users/${mixer}/flavors?page[number]=${currPage}&page[size]=100`).then(function (atfResponse){
                 if(atfResponse.data.length === 0){
                     moreData = false;
                     return;
@@ -77,15 +78,31 @@ const MixerList = () => {
         };
     }
 
+    const validate = values => {
+        const errors = {};
+        forEach(values.mixers, (mixer, index)=>{
+            if(!mixer) {
+                if(!errors.mixers){
+                    errors.mixers = [];
+                }
+                errors.mixers[index] = 'Required';
+            }
+        })
+        return errors;
+    }
+
     return(
         <div>
             <p> Compare Mixer Stashes </p>
-            <Formik initialValues = {initialValues}
+            <Formik
+                initialValues = {initialValues}
+                validate={validate}
                 onSubmit = {getMixersData}>
                 {({
-                 values,
-                 errors,
-                 isSubmitting}) => (
+                  values,
+                  touched,
+                  errors,
+                  isSubmitting}) => (
                  <Form>
                      <FieldArray name="mixers">
                          {({remove, push})=>(
@@ -97,6 +114,7 @@ const MixerList = () => {
                                                   <label htmlFor={`mixers.${index}`}>UserName: </label>
                                                   <Field name={`mixers.${index}`} type="text"/>
                                                   {values.mixers.length > MIN_MIXERS && <button type="button" onClick={()=> remove(index)}>X</button>}
+                                                  {errors.mixers && errors.mixers[index] && touched.mixers && touched.mixers[index] && <span>{errors.mixers[index]}</span>}
                                               </div>
                                           )
                                       )}
@@ -107,7 +125,7 @@ const MixerList = () => {
                              </div>
                          )}
                      </FieldArray>
-                    <button type="submit">Submit</button>
+                    <button disabled={isSubmitting} type="submit">Submit</button>
                  </Form>
                 )}
             </Formik>
