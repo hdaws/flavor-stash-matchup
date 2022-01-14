@@ -3,14 +3,11 @@ import { Formik, Field, FieldArray, Form } from 'formik';
 import axios from 'axios';
 import { forEach, map, intersectionBy } from 'lodash';
 
-//TODO showing mixer names and such is broken. use state?
-//TODO implement reset button to wipe all names from form.
-
 const MixerList = () => {
   const MIN_MIXERS = 2;
   const MAX_MIXERS = 10;
   const initialValues = { mixers: ['', ''] };
-  let mixerNames = [];
+  const [currMixerNames, setMixerNames] = useState([]);
   const [mixerData, setMixerData] = useState({});
   const [flavorSet, setFlavorSet] = useState([]);
   const [listSubmitted, setListSubmitted] = useState(false);
@@ -22,8 +19,7 @@ const MixerList = () => {
     let mixerPromises = [];
     let data = { ...mixerData };
 
-    mixerNames = values.mixers;
-
+    setMixerNames(values.mixers);
     forEach(values.mixers, (mixer) => {
       mixerPromises.push(getUserData(mixer));
     });
@@ -36,17 +32,13 @@ const MixerList = () => {
         }
       });
       setMixerData(data);
-      calculateSetIntersection(data);
+      let flavorSet = data[values.mixers[0]];
+      for (let i = 1; i < values.mixers.length; i++) {
+        flavorSet = intersectionBy(flavorSet, data[values.mixers[i]], 'id');
+      }
+      setFlavorSet(flavorSet);
+      setListSubmitted(true);
     });
-  };
-
-  const calculateSetIntersection = (data) => {
-    let flavorSet = data[mixerNames[0]];
-    for (let i = 1; i < mixerNames.length; i++) {
-      flavorSet = intersectionBy(flavorSet, data[mixerNames[i]], 'id');
-    }
-    setFlavorSet(flavorSet);
-    setListSubmitted(true);
   };
 
   //Check the state to see if we already got and processed the user data.
@@ -111,7 +103,7 @@ const MixerList = () => {
         validate={validate}
         onSubmit={getMixersData}
       >
-        {({ values, touched, errors, isSubmitting }) => (
+        {({ values, touched, errors, resetForm, isSubmitting }) => (
           <Form>
             <FieldArray name="mixers">
               {({ remove, push }) => (
@@ -151,7 +143,7 @@ const MixerList = () => {
             <button disabled={isSubmitting} type="submit">
               Submit
             </button>
-            <button disabled={isSubmitting} type="button">
+            <button disabled={isSubmitting} type="button" onClick={() => resetForm(initialValues)}>
               Reset
             </button>
           </Form>
@@ -160,7 +152,7 @@ const MixerList = () => {
       <div>
         {!atfError && flavorSet.length > 0 && listSubmitted && (
           <div>
-            {mixerNames.map((name) => (
+            {currMixerNames.map((name) => (
               <div key={name}>
                 Name: {name}, Number of Flavors: {mixerData[name].length}
               </div>
