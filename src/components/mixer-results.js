@@ -1,7 +1,5 @@
-import React from 'react';
-
 const MixerResults = () => {
-    return ('')
-}
+  return <h1>Test</h1>;
+};
 
-export default MixerResults
+export default MixerResults;

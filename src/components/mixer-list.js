@@ -1,90 +1,91 @@
-import React, { useState } from 'react';
-import { Formik, Field, FieldArray, Form } from 'formik';
 import axios from 'axios';
-import { forEach, map, intersectionBy } from 'lodash';
+import { Formik, Field, FieldArray, Form } from 'formik';
+import { intersectionBy } from 'lodash';
+import { useCallback, useState } from 'react';
+
+const MIN_MIXERS = 3;
+const MAX_MIXERS = 10;
 
 const MixerList = () => {
-  const MIN_MIXERS = 2;
-  const MAX_MIXERS = 10;
-  const initialValues = { mixers: ['', ''] };
-  const [currMixerNames, setMixerNames] = useState([]);
-  const [mixerData, setMixerData] = useState({});
-  const [flavorSet, setFlavorSet] = useState([]);
-  const [listSubmitted, setListSubmitted] = useState(false);
-  const [atfError, setAtfError] = useState(false);
+  const initialValues = { mixers: ['', '', ''] };
+  const [mixerNames, setMixerNames] = useState([]);
+  const [mixerFlavors, setMixerFlavors] = useState({});
+  const [distinctFlavors, setDistinctFlavors] = useState([]);
+  const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState(false);
 
-  const getMixersData = (values) => {
-    setListSubmitted(false);
-    setAtfError(false);
-    let mixerPromises = [];
-    let data = { ...mixerData };
-
-    setMixerNames(values.mixers);
-    forEach(values.mixers, (mixer) => {
-      mixerPromises.push(getUserData(mixer));
-    });
-    return Promise.allSettled(mixerPromises).then((resultsArray) => {
-      forEach(resultsArray, (result) => {
-        if (result.status === 'fulfilled') {
-          data[result.value.mixer] = result.value.mixerFlavorData;
-        } else {
-          setAtfError(true);
-        }
-      });
-      setMixerData(data);
-      let flavorSet = data[values.mixers[0]];
-      for (let i = 1; i < values.mixers.length; i++) {
-        flavorSet = intersectionBy(flavorSet, data[values.mixers[i]], 'id');
-      }
-      setFlavorSet(flavorSet);
-      setListSubmitted(true);
-    });
-  };
-
-  //Check the state to see if we already got and processed the user data.
-  const getUserData = (mixer) => {
-    if (mixerData[mixer]) {
-      return Promise.resolve({ mixer, mixerFlavorData: mixerData[mixer] });
-    }
-    return getAllMixerData(mixer);
-  };
-
-  //TODO fix linter error and understand why the moreData and currpage cause issues.
-  async function getAllMixerData(mixer) {
-    let currPage = 1;
-    let moreData = true;
-    let mixerFlavorData = [];
-    while (moreData) {
-      await axios
-        .get(
-          `https://alltheflavors.com/api/v2/users/${mixer}/flavors?page[number]=${currPage}&page[size]=100`
+  const getPage = useCallback(
+    async (mixer, page) =>
+      (
+        await axios.get(
+          `https://alltheflavors.com/api/v2/users/${mixer}/flavors?page[number]=${page}&page[size]=100`
         )
-        .then(function (atfResponse) {
-          if (atfResponse.data.length === 0) {
-            moreData = false;
-            return;
-          }
-          currPage++;
-          let flavorData = map(atfResponse.data, (rawFlavorData) => {
-            return {
-              id: rawFlavorData.id,
-              name: rawFlavorData.name,
-              vendorAbbr: rawFlavorData.vendor.abbreviation,
-              vendor: rawFlavorData.vendor.name
-            };
-          });
-          mixerFlavorData.push(...flavorData);
-        });
-    }
-    return {
-      mixer,
-      mixerFlavorData
-    };
-  }
+      ).data,
+    []
+  );
 
-  const validate = (values) => {
+  const getPages = useCallback(
+    async (mixer, page = 1, results = []) => {
+      if (mixerFlavors[mixer]) {
+        return {
+          mixer,
+          flavors: mixerFlavors[mixer]
+        };
+      }
+
+      const flavors = await getPage(mixer, page);
+
+      if (flavors.length === 0) {
+        console.log(
+          `Completed crawl of ${mixer}, they have ${results.length} flavors`
+        );
+        return {
+          mixer,
+          flavors: results
+        };
+      } else {
+        results.push.apply(results, flavors);
+        return await getPages(mixer, page + 1, results);
+      }
+    },
+    [mixerFlavors]
+  );
+
+  const handleSubmit = useCallback(
+    async (values) => {
+      setCompleted(false);
+      setError(false);
+
+      const results = await Promise.allSettled(
+        values.mixers.map((mixer) => getPages(mixer))
+      );
+      const [rejection] = results.filter(
+        (result) => result.status === 'rejected'
+      );
+
+      if (rejection) {
+        setError(true);
+      } else {
+        const values = results.map(({ value }) => value);
+        setMixerFlavors(
+          Object.fromEntries(
+            values.map(({ mixer, flavors }) => [mixer, flavors])
+          )
+        );
+        setDistinctFlavors(
+          values
+            .map(({ flavors }) => flavors)
+            .reduce((a, b) => intersectionBy(a, b, 'id'))
+        );
+        setCompleted(true);
+      }
+    },
+    [setError, setCompleted, setMixerFlavors, setMixerNames, setDistinctFlavors]
+  );
+
+  const validate = useCallback((values) => {
     const errors = {};
-    forEach(values.mixers, (mixer, index) => {
+    values.mixers.forEach((mixer, index) => {
       if (!mixer) {
         if (!errors.mixers) {
           errors.mixers = [];
@@ -93,7 +94,10 @@ const MixerList = () => {
       }
     });
     return errors;
-  };
+  }, []);
+
+  const displayResults = !error && completed;
+  const displayError = error && completed;
 
   return (
     <div>
@@ -101,7 +105,7 @@ const MixerList = () => {
       <Formik
         initialValues={initialValues}
         validate={validate}
-        onSubmit={getMixersData}
+        onSubmit={handleSubmit}
       >
         {({ values, touched, errors, resetForm, isSubmitting }) => (
           <Form>
@@ -143,36 +147,41 @@ const MixerList = () => {
             <button disabled={isSubmitting} type="submit">
               Submit
             </button>
-            <button disabled={isSubmitting} type="button" onClick={() => resetForm(initialValues)}>
+            <button
+              disabled={isSubmitting}
+              type="button"
+              onClick={() => resetForm(initialValues)}
+            >
               Reset
             </button>
           </Form>
         )}
       </Formik>
       <div>
-        {!atfError && flavorSet.length > 0 && listSubmitted && (
+        {displayResults && distinctFlavors.length > 0 && (
           <div>
-            {currMixerNames.map((name) => (
+            {mixerNames.map((name) => (
               <div key={name}>
-                Name: {name}, Number of Flavors: {mixerData[name].length}
+                Name: {name}, Number of Flavors: {mixerFlavors[name].length}
               </div>
             ))}
             <div>
               {' '}
-              There are {flavorSet.length} flavors in common between all mixers{' '}
+              There are {distinctFlavors.length} flavors in common between all
+              mixers{' '}
             </div>
-            {flavorSet.map((flavor, index) => (
-              <div key={index}>
-                Id: {flavor.id} Name: {flavor.name} Vendor: {flavor.vendor}{' '}
-                Abbr: {flavor.vendorAbbr}
+            {distinctFlavors.map((flavor) => (
+              <div key={flavor.id}>
+                Id: {flavor.id} Name: {flavor.name} Vendor: {flavor.vendor.name}{' '}
+                Abbr: {flavor.vendor.abbreviation}
               </div>
             ))}
           </div>
         )}
-        {!atfError && flavorSet.length === 0 && listSubmitted && (
+        {displayResults && distinctFlavors.length === 0 && (
           <h1> No Flavors in Common!</h1>
         )}
-        {atfError && listSubmitted && (
+        {displayError && (
           <h1>
             Could not retrieve mixer data from ATF! Please try again later.
           </h1>
