@@ -1,16 +1,23 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Formik , Field, FieldArray,  Form } from 'formik';
 import axios from 'axios';
 import {forEach, map, intersectionBy} from 'lodash';
 
+//TODO ATF does not 404 if a user doesn't exist, gets empty flavor list. Should handle this case and maybe display a warning?
+//TODO Formik onchange to submitted state isn't working. Find out why.
+
 const MixerList = () => {
     const MIN_MIXERS = 2;
-    const MAX_MIXERS = 5;
+    const MAX_MIXERS = 10;
     const initialValues = { mixers: ['', '']} ;
     const [mixerData, setMixerData] = useState({});
     const [flavorSet, setFlavorSet] = useState([]);
+    const [listSubmitted, setListSubmitted] = useState(false);
+    const [atfError, setAtfError] = useState(false);
 
     const getMixersData = (values) => {
+        setListSubmitted(false);
+        setAtfError(false);
        let mixerPromises = [];
        let data = {...mixerData};
 
@@ -23,7 +30,7 @@ const MixerList = () => {
                     data[result.value.mixer] = result.value.mixerFlavorData;
                 }
                 else {
-                    //TODO set errors with Formik.
+                    setAtfError(true);
                 }
             })
             setMixerData(data);
@@ -40,6 +47,7 @@ const MixerList = () => {
            flavorSet = intersectionBy(flavorSet, data[mixer], 'id')
         })
         setFlavorSet(flavorSet);
+        setListSubmitted(true);
     }
 
     //Check the state to see if we already got and processed the user data.
@@ -97,7 +105,8 @@ const MixerList = () => {
             <Formik
                 initialValues = {initialValues}
                 validate={validate}
-                onSubmit = {getMixersData}>
+                onSubmit = {getMixersData}
+                handleChange = {()=>{setListSubmitted(false)}}>
                 {({
                   values,
                   touched,
@@ -130,7 +139,7 @@ const MixerList = () => {
                 )}
             </Formik>
             <div>
-                {(flavorSet.length > 0 &&
+                {(!atfError && flavorSet.length > 0 && listSubmitted &&
                         <div>
                             <div> There are {flavorSet.length} flavors in common between all mixers </div>
                             { flavorSet.map((flavor, index) => (
@@ -140,6 +149,8 @@ const MixerList = () => {
                                 ))}
                         </div>
                     )}
+                {!atfError && flavorSet.length === 0 && listSubmitted && <h1> No Flavors in Common!</h1>}
+                {atfError && listSubmitted && <h1>Could not retrieve mixer data from ATF! Please try again later.</h1>}
             </div>
         </div>
     )
