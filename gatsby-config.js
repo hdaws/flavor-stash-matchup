@@ -1,7 +1,8 @@
 module.exports = {
+    pathPrefix: "/flavor-stash-matchup",
     siteMetadata: {
       title: `Flavor Stash Matchup`,
-        siteUrl: `https://www.yourdomain.tld`,
+        siteUrl: `https://hdaws.github.io/`,
     },
     plugins: [
         'gatsby-plugin-eslint'
