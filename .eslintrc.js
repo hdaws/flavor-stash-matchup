@@ -20,8 +20,8 @@ module.exports = {
     ecmaVersion: 12
   },
   rules: {
-    'react/jsx-uses-react': 0,
-    'react/react-in-jsx-scope': 0
+    'react/jsx-uses-react': 'off',
+    'react/react-in-jsx-scope': 'off'
   },
   settings: {
     react: {
