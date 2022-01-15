@@ -51,7 +51,7 @@ const MixerList = () => {
             id: rawFlavorData.id,
             name: rawFlavorData.name,
             vendorAbbr: rawFlavorData.vendor.abbreviation,
-            vendor: rawFlavorData.vendor.name
+            slug: rawFlavorData.slug
           };
         });
         results.push.apply(results, flavorData);

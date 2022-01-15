@@ -86,7 +86,7 @@ EnhancedTableHead.propTypes = {
 
 const MixerResults = (props) => {
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('calories');
+  const [orderBy, setOrderBy] = useState('vendorAbbr');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(500);
 
@@ -96,8 +96,9 @@ const MixerResults = (props) => {
     setOrderBy(property);
   };
 
-  const handleClick = (event, id) => {
-    console.log('CLICK TO OPEN NEW LINK TO ATF. NOT YET IMPLEMENTED', id);
+  const handleClick = (event, slug) => {
+    const url = `https://alltheflavors.com/flavors/${slug}`;
+    window.open(url, '_blank');
   };
 
   const handleChangePage = (event, newPage) => {
@@ -136,7 +137,7 @@ const MixerResults = (props) => {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row.slug)}
                       tabIndex={-1}
                       key={row.id}
                     >
