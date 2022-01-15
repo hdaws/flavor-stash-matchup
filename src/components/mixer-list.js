@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Formik, Field, FieldArray, Form } from 'formik';
 import { intersectionBy } from 'lodash';
 import { useCallback, useState } from 'react';
+import MixerResults from './mixer-results';
 
 const MIN_MIXERS = 2;
 const MAX_MIXERS = 10;
@@ -189,12 +190,7 @@ const MixerList = () => {
               There are {distinctFlavors.length} flavors in common between all
               mixers{' '}
             </div>
-            {distinctFlavors.map((flavor, index) => (
-              <div key={index}>
-                Id: {flavor.id} Name: {flavor.name} Vendor: {flavor.vendor}{' '}
-                Abbr: {flavor.vendorAbbr}
-              </div>
-            ))}
+            <MixerResults data={distinctFlavors} />
           </div>
         )}
         {displayResults && distinctFlavors.length === 0 && (

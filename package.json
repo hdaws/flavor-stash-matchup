@@ -14,10 +14,15 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@mui/material": "^5.2.8",
+    "@mui/utils": "^5.2.3",
     "axios": "^0.24.0",
     "formik": "^2.2.9",
     "gatsby": "^4.5.2",
     "lodash": "^4.17.21",
+    "prop-types": "^15.8.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
