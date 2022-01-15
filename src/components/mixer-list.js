@@ -60,37 +60,47 @@ const MixerList = () => {
     [mixerFlavors]
   );
 
-  const handleSubmit = async (values) => {
-    setCompleted(false);
-    setAtfError(false);
-    setMixerNames(values.mixers);
+  const handleSubmit = useCallback(
+    async (values) => {
+      setCompleted(false);
+      setAtfError(false);
+      setMixerNames(values.mixers);
 
-    const results = await Promise.allSettled(
-      values.mixers.map((mixer) => getPages(mixer))
-    );
-    const [rejection] = results.filter(
-      (result) => result.status === 'rejected'
-    );
-
-    if (rejection) {
-      setAtfError(true);
-    } else {
-      const values = results.map(({ value }) => value);
-      let mixerData = { ...mixerFlavors };
-
-      values.forEach(({ mixer, flavors }) => {
-        mixerData[mixer] = flavors;
-      });
-
-      setMixerFlavors(mixerData);
-      setDistinctFlavors(
-        values
-          .map(({ flavors }) => flavors)
-          .reduce((a, b) => intersectionBy(a, b, 'id'))
+      const results = await Promise.allSettled(
+        values.mixers.map((mixer) => getPages(mixer))
       );
-    }
-    setCompleted(true);
-  };
+      const [rejection] = results.filter(
+        (result) => result.status === 'rejected'
+      );
+
+      if (rejection) {
+        setAtfError(true);
+      } else {
+        const values = results.map(({ value }) => value);
+        let mixerData = { ...mixerFlavors };
+
+        values.forEach(({ mixer, flavors }) => {
+          mixerData[mixer] = flavors;
+        });
+
+        setMixerFlavors(mixerData);
+        setDistinctFlavors(
+          values
+            .map(({ flavors }) => flavors)
+            .reduce((a, b) => intersectionBy(a, b, 'id'))
+        );
+      }
+      setCompleted(true);
+    },
+    [
+      mixerFlavors,
+      setMixerFlavors,
+      setDistinctFlavors,
+      setCompleted,
+      setAtfError,
+      setMixerNames
+    ]
+  );
 
   const validate = useCallback((values) => {
     const errors = {};
