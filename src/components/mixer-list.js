@@ -3,6 +3,8 @@ import { Formik, Field, FieldArray, Form } from 'formik';
 import { intersectionBy } from 'lodash';
 import { useCallback, useState } from 'react';
 import MixerResults from './mixer-results';
+import { IconButton, Button, Container, Typography } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const MIN_MIXERS = 2;
 const MAX_MIXERS = 10;
@@ -120,8 +122,15 @@ const MixerList = () => {
   const displayError = atfError && completed;
 
   return (
-    <div>
-      <p> Compare Mixer Stashes </p>
+    <Container maxWidth="xl">
+      <p>
+        This tool allows you to see what flavorings are shared in common for
+        multiple mixers, based on their AllTheFlavors.com stash lists.
+      </p>
+      <Typography style={{ fontWeight: 600 }} variant="h6">
+        {' '}
+        Compare Mixer Stashes{' '}
+      </Typography>
       <Formik
         initialValues={initialValues}
         validate={validate}
@@ -139,9 +148,13 @@ const MixerList = () => {
                           <label htmlFor={`mixers.${index}`}>UserName: </label>
                           <Field name={`mixers.${index}`} type="text" />
                           {values.mixers.length > MIN_MIXERS && (
-                            <button type="button" onClick={() => remove(index)}>
-                              X
-                            </button>
+                            <IconButton
+                              color="error"
+                              type="button"
+                              onClick={() => remove(index)}
+                            >
+                              <ClearIcon />
+                            </IconButton>
                           )}
                           {errors.mixers &&
                             errors.mixers[index] &&
@@ -153,27 +166,29 @@ const MixerList = () => {
                       ))}
                   </div>
                   <div>
-                    <button
+                    <Button
+                      variant="contained"
                       type="button"
                       disabled={values.mixers.length >= MAX_MIXERS}
                       onClick={() => push('')}
                     >
                       Add Mixer
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
             </FieldArray>
-            <button disabled={isSubmitting} type="submit">
+            <Button variant="contained" disabled={isSubmitting} type="submit">
               Submit
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="contained"
               disabled={isSubmitting}
               type="button"
               onClick={() => resetForm(initialValues)}
             >
               Reset
-            </button>
+            </Button>
           </Form>
         )}
       </Formik>
@@ -202,7 +217,7 @@ const MixerList = () => {
           </h1>
         )}
       </div>
-    </div>
+    </Container>
   );
 };
 
