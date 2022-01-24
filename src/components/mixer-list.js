@@ -131,7 +131,7 @@ const MixerList = () => {
 
   return (
     <Container maxWidth="xl">
-      <Paper sx={{ mb: 2, mt: 2, p: 2 }}>
+      <Paper sx={{ mb: 2, mt: 2, p: 2, maxWidth: '75%' }}>
         <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
           {' '}
           Compare Mixer Stashes{' '}
@@ -208,7 +208,7 @@ const MixerList = () => {
                 }}
               >
                 <Button
-                  sx={{ m: 1 }}
+                  sx={{ m: 0.5 }}
                   color="success"
                   variant="contained"
                   disabled={isSubmitting}
@@ -217,7 +217,7 @@ const MixerList = () => {
                   Submit
                 </Button>
                 <Button
-                  sx={{ m: 1 }}
+                  sx={{ m: 0.5 }}
                   variant="contained"
                   disabled={isSubmitting}
                   type="button"
