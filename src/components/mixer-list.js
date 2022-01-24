@@ -1,9 +1,17 @@
 import axios from 'axios';
-import { Formik, Field, FieldArray, Form } from 'formik';
+import { Formik, FieldArray, Form } from 'formik';
 import { intersectionBy } from 'lodash';
 import { useCallback, useState } from 'react';
 import MixerResults from './mixer-results';
-import { IconButton, Button, Container, Typography } from '@mui/material';
+import {
+  IconButton,
+  Button,
+  Container,
+  Typography,
+  TextField,
+  Box,
+  Paper
+} from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const MIN_MIXERS = 2;
@@ -127,71 +135,83 @@ const MixerList = () => {
         This tool allows you to see what flavorings are shared in common for
         multiple mixers, based on their AllTheFlavors.com stash lists.
       </p>
-      <Typography style={{ fontWeight: 600 }} variant="h6">
-        {' '}
-        Compare Mixer Stashes{' '}
-      </Typography>
-      <Formik
-        initialValues={initialValues}
-        validate={validate}
-        onSubmit={handleSubmit}
-      >
-        {({ values, touched, errors, resetForm, isSubmitting }) => (
-          <Form>
-            <FieldArray name="mixers">
-              {({ remove, push }) => (
-                <div>
+      <Paper sx={{ mb: 2, p: 2 }}>
+        <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
+          {' '}
+          Compare Mixer Stashes{' '}
+        </Typography>
+        <Formik
+          initialValues={initialValues}
+          validate={validate}
+          onSubmit={handleSubmit}
+        >
+          {({ values, touched, errors, resetForm, isSubmitting }) => (
+            <Form>
+              <FieldArray name="mixers">
+                {({ remove, push }) => (
                   <div>
-                    {values.mixers.length > 0 &&
-                      values.mixers.map((mixer, index) => (
-                        <div key={index}>
-                          <label htmlFor={`mixers.${index}`}>UserName: </label>
-                          <Field name={`mixers.${index}`} type="text" />
-                          {values.mixers.length > MIN_MIXERS && (
-                            <IconButton
-                              color="error"
-                              type="button"
-                              onClick={() => remove(index)}
-                            >
-                              <ClearIcon />
-                            </IconButton>
-                          )}
-                          {errors.mixers &&
-                            errors.mixers[index] &&
-                            touched.mixers &&
-                            touched.mixers[index] && (
-                              <span>{errors.mixers[index]}</span>
+                    <div>
+                      {values.mixers.length > 0 &&
+                        values.mixers.map((mixer, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: 'flex',
+                              mb: 1,
+                              alignItems: 'center'
+                            }}
+                          >
+                            <TextField
+                              label="Mixer Name:"
+                              name={`mixers.${index}`}
+                              type="text"
+                            />
+                            {values.mixers.length > MIN_MIXERS && (
+                              <IconButton
+                                color="error"
+                                type="button"
+                                onClick={() => remove(index)}
+                              >
+                                <ClearIcon />
+                              </IconButton>
                             )}
-                        </div>
-                      ))}
+                            {errors.mixers &&
+                              errors.mixers[index] &&
+                              touched.mixers &&
+                              touched.mixers[index] && (
+                                <span>{errors.mixers[index]}</span>
+                              )}
+                          </Box>
+                        ))}
+                    </div>
+                    <div>
+                      <Button
+                        variant="contained"
+                        type="button"
+                        disabled={values.mixers.length >= MAX_MIXERS}
+                        onClick={() => push('')}
+                      >
+                        Add Mixer
+                      </Button>
+                    </div>
                   </div>
-                  <div>
-                    <Button
-                      variant="contained"
-                      type="button"
-                      disabled={values.mixers.length >= MAX_MIXERS}
-                      onClick={() => push('')}
-                    >
-                      Add Mixer
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </FieldArray>
-            <Button variant="contained" disabled={isSubmitting} type="submit">
-              Submit
-            </Button>
-            <Button
-              variant="contained"
-              disabled={isSubmitting}
-              type="button"
-              onClick={() => resetForm(initialValues)}
-            >
-              Reset
-            </Button>
-          </Form>
-        )}
-      </Formik>
+                )}
+              </FieldArray>
+              <Button variant="contained" disabled={isSubmitting} type="submit">
+                Submit
+              </Button>
+              <Button
+                variant="contained"
+                disabled={isSubmitting}
+                type="button"
+                onClick={() => resetForm(initialValues)}
+              >
+                Reset
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </Paper>
       <div>
         {displayResults && distinctFlavors.length > 0 && (
           <div>
