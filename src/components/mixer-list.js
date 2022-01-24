@@ -10,9 +10,12 @@ import {
   Typography,
   TextField,
   Box,
-  Paper
+  Paper,
+  Chip,
+  Stack
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
+import Link from '@mui/material/Link';
 
 const MIN_MIXERS = 2;
 const MAX_MIXERS = 10;
@@ -117,124 +120,134 @@ const MixerList = () => {
   const displayError = atfError && completed;
 
   return (
-    <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Paper sx={{ mb: 2, mt: 2, p: 2, maxWidth: '75%' }}>
-        <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
-          {' '}
-          Compare Mixer Stashes{' '}
-        </Typography>
-        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-          {({ values, resetForm, isSubmitting, handleChange }) => (
-            <Form>
-              <p>
-                This tool allows you to see what flavorings are shared in common
-                for for multiple mixers, based on their AllTheFlavors.com stash
-                lists.
-              </p>
-              <FieldArray name="mixers">
-                {({ remove, push }) => (
-                  <div>
+    <Container maxWidth="xl">
+      <Stack sx={{ maxWidth: '75%' }}>
+        <Paper sx={{ mb: 2, mt: 2, p: 2 }}>
+          <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
+            {' '}
+            Compare Mixer Stashes{' '}
+          </Typography>
+          <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+            {({ values, resetForm, isSubmitting, handleChange }) => (
+              <Form>
+                <p>
+                  This tool allows you to see what flavorings are shared in
+                  common for for multiple mixers, based on their{' '}
+                  <Link
+                    href="https://alltheflavors.com"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    AllTheFlavors.com
+                  </Link>{' '}
+                  stash lists.
+                </p>
+                <FieldArray name="mixers">
+                  {({ remove, push }) => (
                     <div>
-                      {values.mixers.length > 0 &&
-                        values.mixers.map((mixer, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              display: 'flex',
-                              mb: 1,
-                              alignItems: 'center'
-                            }}
-                          >
-                            <TextField
-                              value={values.mixers[index]}
-                              onChange={handleChange}
-                              label="Mixer Name"
-                              required
-                              name={`mixers.${index}`}
-                              type="text"
-                            />
-                            {values.mixers.length > MIN_MIXERS && (
-                              <IconButton
-                                color="error"
-                                type="button"
-                                onClick={() => remove(index)}
-                              >
-                                <ClearIcon />
-                              </IconButton>
-                            )}
-                          </Box>
-                        ))}
+                      <div>
+                        {values.mixers.length > 0 &&
+                          values.mixers.map((mixer, index) => (
+                            <Box
+                              key={index}
+                              sx={{
+                                display: 'flex',
+                                mb: 1,
+                                alignItems: 'center'
+                              }}
+                            >
+                              <TextField
+                                value={values.mixers[index]}
+                                onChange={handleChange}
+                                label="Mixer Name"
+                                required
+                                name={`mixers.${index}`}
+                                type="text"
+                              />
+                              {values.mixers.length > MIN_MIXERS && (
+                                <IconButton
+                                  color="error"
+                                  type="button"
+                                  onClick={() => remove(index)}
+                                >
+                                  <ClearIcon />
+                                </IconButton>
+                              )}
+                            </Box>
+                          ))}
+                      </div>
+                      <div>
+                        <Button
+                          variant="contained"
+                          type="button"
+                          disabled={values.mixers.length >= MAX_MIXERS}
+                          onClick={() => push('')}
+                        >
+                          Add Mixer
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Button
-                        variant="contained"
-                        type="button"
-                        disabled={values.mixers.length >= MAX_MIXERS}
-                        onClick={() => push('')}
-                      >
-                        Add Mixer
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </FieldArray>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  pl: 2,
-                  pr: 2,
-                  pt: 2
-                }}
-              >
-                <Button
-                  sx={{ m: 0.5 }}
-                  color="success"
-                  variant="contained"
-                  disabled={isSubmitting}
-                  type="submit"
+                  )}
+                </FieldArray>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    pl: 2,
+                    pr: 2,
+                    pt: 2
+                  }}
                 >
-                  Submit
-                </Button>
-                <Button
-                  sx={{ m: 0.5 }}
-                  variant="contained"
-                  disabled={isSubmitting}
-                  type="button"
-                  onClick={() => resetForm(initialValues)}
-                >
-                  Reset
-                </Button>
-              </Box>
-            </Form>
-          )}
-        </Formik>
-      </Paper>
-      <div>
-        {displayResults && distinctFlavors.length > 0 && (
-          <div>
-            {mixerNames.map((name) => (
-              <div key={name}>
-                Name: {name}, Number of Flavors: {mixerFlavors[name].length}
-              </div>
-            ))}
+                  <Button
+                    sx={{ m: 0.5 }}
+                    color="success"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    type="submit"
+                  >
+                    Submit
+                  </Button>
+                  <Button
+                    sx={{ m: 0.5 }}
+                    variant="contained"
+                    disabled={isSubmitting}
+                    type="button"
+                    onClick={() => resetForm(initialValues)}
+                  >
+                    Reset
+                  </Button>
+                </Box>
+              </Form>
+            )}
+          </Formik>
+        </Paper>
+        <div>
+          {displayResults && distinctFlavors.length > 0 && (
             <div>
-              {' '}
-              There are {distinctFlavors.length} flavors in common between all
-              mixers{' '}
+              {mixerNames.map((name) => (
+                <Chip
+                  key={name}
+                  label={`${name}: ${mixerFlavors[name].length} Flavors`}
+                />
+              ))}
+              <div>
+                {' '}
+                There are {distinctFlavors.length} flavors in common between all
+                mixers{' '}
+              </div>
+              <MixerResults data={distinctFlavors} />
             </div>
-            <MixerResults data={distinctFlavors} />
-          </div>
-        )}
-        {displayResults && distinctFlavors.length === 0 && (
-          <h1> No Flavors in Common!</h1>
-        )}
-        {displayError && (
-          <h1>
-            Could not retrieve mixer data from ATF! Please try again later.
-          </h1>
-        )}
-      </div>
+          )}
+          {displayResults && distinctFlavors.length === 0 && (
+            <h1> No Flavors in Common!</h1>
+          )}
+          {displayError && (
+            <h1>
+              Could not retrieve mixer data from ATF! Please try again later.
+            </h1>
+          )}
+        </div>
+      </Stack>
     </Container>
   );
 };
