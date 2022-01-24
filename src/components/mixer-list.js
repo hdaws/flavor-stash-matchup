@@ -113,35 +113,18 @@ const MixerList = () => {
     ]
   );
 
-  const validate = useCallback((values) => {
-    const errors = {};
-    values.mixers.forEach((mixer, index) => {
-      if (!mixer) {
-        if (!errors.mixers) {
-          errors.mixers = [];
-        }
-        errors.mixers[index] = 'Required';
-      }
-    });
-    return errors;
-  }, []);
-
   const displayResults = !atfError && completed;
   const displayError = atfError && completed;
 
   return (
-    <Container maxWidth="xl">
+    <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center' }}>
       <Paper sx={{ mb: 2, mt: 2, p: 2, maxWidth: '75%' }}>
         <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
           {' '}
           Compare Mixer Stashes{' '}
         </Typography>
-        <Formik
-          initialValues={initialValues}
-          validate={validate}
-          onSubmit={handleSubmit}
-        >
-          {({ values, touched, errors, resetForm, isSubmitting }) => (
+        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+          {({ values, resetForm, isSubmitting, handleChange }) => (
             <Form>
               <p>
                 This tool allows you to see what flavorings are shared in common
@@ -163,7 +146,10 @@ const MixerList = () => {
                             }}
                           >
                             <TextField
-                              label="Mixer Name:"
+                              value={values.mixers[index]}
+                              onChange={handleChange}
+                              label="Mixer Name"
+                              required
                               name={`mixers.${index}`}
                               type="text"
                             />
@@ -176,12 +162,6 @@ const MixerList = () => {
                                 <ClearIcon />
                               </IconButton>
                             )}
-                            {errors.mixers &&
-                              errors.mixers[index] &&
-                              touched.mixers &&
-                              touched.mixers[index] && (
-                                <span>{errors.mixers[index]}</span>
-                              )}
                           </Box>
                         ))}
                     </div>
