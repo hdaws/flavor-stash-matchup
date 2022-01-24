@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
-import { AppBar, Container, Typography } from '@mui/material';
+import { AppBar, Toolbar, Typography } from '@mui/material';
 
 const Header = ({ siteTitle = '' }) => {
   return (
     <AppBar position="static">
-      <Container maxWidth="xl">
+      <Toolbar>
         <Typography variant="h4">{siteTitle}</Typography>
-      </Container>
+      </Toolbar>
     </AppBar>
   );
 };

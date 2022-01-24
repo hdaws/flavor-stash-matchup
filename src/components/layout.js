@@ -3,6 +3,7 @@ import { useStaticQuery, graphql } from 'gatsby';
 import { Fragment } from 'react';
 import Header from './header';
 import Footer from './footer';
+import { CssBaseline } from '@mui/material';
 
 const Layout = ({ children }) => {
   const data = useStaticQuery(graphql`
@@ -17,6 +18,7 @@ const Layout = ({ children }) => {
 
   return (
     <Fragment>
+      <CssBaseline />
       <Header siteTitle={data.site.siteMetadata.title} />
       <main>{children}</main>
       <Footer />

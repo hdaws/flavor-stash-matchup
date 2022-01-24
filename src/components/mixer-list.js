@@ -1,8 +1,18 @@
 import axios from 'axios';
-import { Formik, Field, FieldArray, Form } from 'formik';
+import { Formik, FieldArray, Form } from 'formik';
 import { intersectionBy } from 'lodash';
 import { useCallback, useState } from 'react';
 import MixerResults from './mixer-results';
+import {
+  IconButton,
+  Button,
+  Container,
+  Typography,
+  TextField,
+  Box,
+  Paper
+} from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const MIN_MIXERS = 2;
 const MAX_MIXERS = 10;
@@ -103,80 +113,103 @@ const MixerList = () => {
     ]
   );
 
-  const validate = useCallback((values) => {
-    const errors = {};
-    values.mixers.forEach((mixer, index) => {
-      if (!mixer) {
-        if (!errors.mixers) {
-          errors.mixers = [];
-        }
-        errors.mixers[index] = 'Required';
-      }
-    });
-    return errors;
-  }, []);
-
   const displayResults = !atfError && completed;
   const displayError = atfError && completed;
 
   return (
-    <div>
-      <p> Compare Mixer Stashes </p>
-      <Formik
-        initialValues={initialValues}
-        validate={validate}
-        onSubmit={handleSubmit}
-      >
-        {({ values, touched, errors, resetForm, isSubmitting }) => (
-          <Form>
-            <FieldArray name="mixers">
-              {({ remove, push }) => (
-                <div>
+    <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Paper sx={{ mb: 2, mt: 2, p: 2, maxWidth: '75%' }}>
+        <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
+          {' '}
+          Compare Mixer Stashes{' '}
+        </Typography>
+        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+          {({ values, resetForm, isSubmitting, handleChange }) => (
+            <Form>
+              <p>
+                This tool allows you to see what flavorings are shared in common
+                for for multiple mixers, based on their AllTheFlavors.com stash
+                lists.
+              </p>
+              <FieldArray name="mixers">
+                {({ remove, push }) => (
                   <div>
-                    {values.mixers.length > 0 &&
-                      values.mixers.map((mixer, index) => (
-                        <div key={index}>
-                          <label htmlFor={`mixers.${index}`}>UserName: </label>
-                          <Field name={`mixers.${index}`} type="text" />
-                          {values.mixers.length > MIN_MIXERS && (
-                            <button type="button" onClick={() => remove(index)}>
-                              X
-                            </button>
-                          )}
-                          {errors.mixers &&
-                            errors.mixers[index] &&
-                            touched.mixers &&
-                            touched.mixers[index] && (
-                              <span>{errors.mixers[index]}</span>
+                    <div>
+                      {values.mixers.length > 0 &&
+                        values.mixers.map((mixer, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: 'flex',
+                              mb: 1,
+                              alignItems: 'center'
+                            }}
+                          >
+                            <TextField
+                              value={values.mixers[index]}
+                              onChange={handleChange}
+                              label="Mixer Name"
+                              required
+                              name={`mixers.${index}`}
+                              type="text"
+                            />
+                            {values.mixers.length > MIN_MIXERS && (
+                              <IconButton
+                                color="error"
+                                type="button"
+                                onClick={() => remove(index)}
+                              >
+                                <ClearIcon />
+                              </IconButton>
                             )}
-                        </div>
-                      ))}
+                          </Box>
+                        ))}
+                    </div>
+                    <div>
+                      <Button
+                        variant="contained"
+                        type="button"
+                        disabled={values.mixers.length >= MAX_MIXERS}
+                        onClick={() => push('')}
+                      >
+                        Add Mixer
+                      </Button>
+                    </div>
                   </div>
-                  <div>
-                    <button
-                      type="button"
-                      disabled={values.mixers.length >= MAX_MIXERS}
-                      onClick={() => push('')}
-                    >
-                      Add Mixer
-                    </button>
-                  </div>
-                </div>
-              )}
-            </FieldArray>
-            <button disabled={isSubmitting} type="submit">
-              Submit
-            </button>
-            <button
-              disabled={isSubmitting}
-              type="button"
-              onClick={() => resetForm(initialValues)}
-            >
-              Reset
-            </button>
-          </Form>
-        )}
-      </Formik>
+                )}
+              </FieldArray>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  pl: 2,
+                  pr: 2,
+                  pt: 2
+                }}
+              >
+                <Button
+                  sx={{ m: 0.5 }}
+                  color="success"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
+                  Submit
+                </Button>
+                <Button
+                  sx={{ m: 0.5 }}
+                  variant="contained"
+                  disabled={isSubmitting}
+                  type="button"
+                  onClick={() => resetForm(initialValues)}
+                >
+                  Reset
+                </Button>
+              </Box>
+            </Form>
+          )}
+        </Formik>
+      </Paper>
       <div>
         {displayResults && distinctFlavors.length > 0 && (
           <div>
@@ -202,7 +235,7 @@ const MixerList = () => {
           </h1>
         )}
       </div>
-    </div>
+    </Container>
   );
 };
 
