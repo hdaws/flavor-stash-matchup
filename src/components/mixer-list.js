@@ -131,11 +131,7 @@ const MixerList = () => {
 
   return (
     <Container maxWidth="xl">
-      <p>
-        This tool allows you to see what flavorings are shared in common for
-        multiple mixers, based on their AllTheFlavors.com stash lists.
-      </p>
-      <Paper sx={{ mb: 2, p: 2 }}>
+      <Paper sx={{ mb: 2, mt: 2, p: 2 }}>
         <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
           {' '}
           Compare Mixer Stashes{' '}
@@ -147,6 +143,11 @@ const MixerList = () => {
         >
           {({ values, touched, errors, resetForm, isSubmitting }) => (
             <Form>
+              <p>
+                This tool allows you to see what flavorings are shared in common
+                for for multiple mixers, based on their AllTheFlavors.com stash
+                lists.
+              </p>
               <FieldArray name="mixers">
                 {({ remove, push }) => (
                   <div>
@@ -197,17 +198,34 @@ const MixerList = () => {
                   </div>
                 )}
               </FieldArray>
-              <Button variant="contained" disabled={isSubmitting} type="submit">
-                Submit
-              </Button>
-              <Button
-                variant="contained"
-                disabled={isSubmitting}
-                type="button"
-                onClick={() => resetForm(initialValues)}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  pl: 2,
+                  pr: 2,
+                  pt: 2
+                }}
               >
-                Reset
-              </Button>
+                <Button
+                  sx={{ m: 1 }}
+                  color="success"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
+                  Submit
+                </Button>
+                <Button
+                  sx={{ m: 1 }}
+                  variant="contained"
+                  disabled={isSubmitting}
+                  type="button"
+                  onClick={() => resetForm(initialValues)}
+                >
+                  Reset
+                </Button>
+              </Box>
             </Form>
           )}
         </Formik>
