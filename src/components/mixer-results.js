@@ -11,6 +11,7 @@ import {
   TableSortLabel,
   Paper
 } from '@mui/material';
+import Link from '@mui/material/Link';
 import { visuallyHidden } from '@mui/utils';
 import PropTypes from 'prop-types';
 
@@ -96,11 +97,6 @@ const MixerResults = (props) => {
     setOrderBy(property);
   };
 
-  const handleClick = (event, slug) => {
-    const url = `https://alltheflavors.com/flavors/${slug}`;
-    window.open(url, '_blank');
-  };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -135,16 +131,19 @@ const MixerResults = (props) => {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.slug)}
-                      tabIndex={-1}
-                      key={row.id}
-                    >
+                    <TableRow hover tabIndex={-1} key={row.id}>
                       <TableCell component="th" id={row.id} scope="row">
                         {row.vendorAbbr}
                       </TableCell>
-                      <TableCell align="left">{row.name}</TableCell>
+                      <TableCell align="left">
+                        <Link
+                          href={`https://alltheflavors.com/flavors/${row.slug}`}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          {row.name}
+                        </Link>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -164,7 +163,7 @@ const MixerResults = (props) => {
           component="div"
           count={props.data.length}
           rowsPerPage={rowsPerPage}
-          rowsPerPageOptions={[100, 500, { value: -1, label: 'All' }]}
+          rowsPerPageOptions={[50, 100, 500, { value: -1, label: 'All' }]}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
