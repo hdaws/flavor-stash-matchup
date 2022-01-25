@@ -12,7 +12,8 @@ import {
   Box,
   Paper,
   Chip,
-  Stack
+  Stack,
+  Grid
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import Link from '@mui/material/Link';
@@ -121,8 +122,8 @@ const MixerList = () => {
 
   return (
     <Container maxWidth="xl">
-      <Stack sx={{ maxWidth: '75%' }}>
-        <Paper sx={{ mb: 2, mt: 2, p: 2 }}>
+      <Stack sx={{ maxWidth: '75%', mx: 'auto' }}>
+        <Paper sx={{ my: 2, p: 2 }}>
           <Typography style={{ fontWeight: 600 }} variant="h6" sx={{ mb: 2 }}>
             {' '}
             Compare Mixer Stashes{' '}
@@ -222,19 +223,32 @@ const MixerList = () => {
           </Formik>
         </Paper>
         <div>
+          {displayResults && (
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              {mixerNames.map((name) => (
+                <Grid key={name} item xs={3}>
+                  <Chip
+                    sx={{
+                      color: 'white',
+                      bgcolor: mixerFlavors[name].length ? 'green' : 'red'
+                    }}
+                    label={`${name}: ${mixerFlavors[name].length} Flavors`}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )}
           {displayResults && distinctFlavors.length > 0 && (
             <div>
-              {mixerNames.map((name) => (
-                <Chip
-                  key={name}
-                  label={`${name}: ${mixerFlavors[name].length} Flavors`}
-                />
-              ))}
-              <div>
+              <Typography
+                style={{ fontWeight: 600 }}
+                variant="h6"
+                sx={{ mb: 2 }}
+              >
                 {' '}
                 There are {distinctFlavors.length} flavors in common between all
                 mixers{' '}
-              </div>
+              </Typography>
               <MixerResults data={distinctFlavors} />
             </div>
           )}
