@@ -1,7 +1,7 @@
 This is a small project to do a comparison of flavor stash lists from AllTheFlavors.com
 
 Technologies Used:
-* Gatsby 
+* Gatsby
 * React 
 * Formik 
 * Lodash
@@ -19,3 +19,6 @@ To Publish:
 * Copy Gastby output from public/ to docs/ 
 
 IE11 compatibility tricks are not used and the browser is unsupported for this project. 
+
+
+Strictly speaking, several frameworks in here could be considered overkill for this size project, but it was also intended as a learning exercise with those frameworks. 
